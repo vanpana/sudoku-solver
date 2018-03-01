@@ -48,6 +48,9 @@ class Problem:
         return True
 
     def __set_missing_numbers(self):
+        """
+        Sets missing numbers from the matrix to the missing_numbers list
+        """
         frequency = {}
         for i in range(1, self.__matrix_size + 1):
             frequency[i] = self.__matrix_size

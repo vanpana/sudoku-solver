@@ -14,7 +14,6 @@ class Console:
 
         self.__print_menu()
 
-        command = -1
         try:
             command = int(input("Input your command: "))
 
