@@ -1,6 +1,3 @@
-from Domain.State import State
-
-
 class Problem:
     def __init__(self, filename):
         self.__matrix_size = 0
