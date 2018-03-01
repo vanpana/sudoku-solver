@@ -2,6 +2,9 @@ class Controller:
     def __init__(self, problem):
         self.__instance = problem
 
+    def is_valid(self):
+        return self.__instance.is_valid()
+
     def order_states(self, states):
         pass  # TODO: pass a list of states and return an ordered list of states
 

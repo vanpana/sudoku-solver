@@ -10,18 +10,20 @@ class Console:
               "0. Exit\n")
 
     def run(self):
-        methods = {1: self.__controller.solve_bfs, 2: self.__controller.solve_gbfs}
+        if self.__controller.is_valid():
+            methods = {1: self.__controller.solve_bfs, 2: self.__controller.solve_gbfs}
 
-        self.__print_menu()
+            self.__print_menu()
 
-        command = -1
-        try:
-            command = int(input("Input your command: "))
+            try:
+                command = int(input("Input your command: "))
 
-            if command == 0:
-                exit(0)
-            else:
-                methods[command]()
-        except TypeError:
-            print("Must input a valid integer")
-        self.run()
+                if command == 0:
+                    exit(0)
+                else:
+                    methods[command]()
+            except TypeError:
+                print("Must input a valid integer")
+            self.run()
+        else:
+            print("Problem is not valid")
