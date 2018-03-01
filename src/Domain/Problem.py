@@ -27,25 +27,28 @@ class Problem:
         Reads from file and creates matrix.
         :rtype: boolean
         """
-        with open(self.__filename, "r") as file:
-            for line in file:
-                line = line.strip("\n")
+        try:
+            with open(self.__filename, "r") as file:
+                for line in file:
+                    line = line.strip("\n")
 
-                if len(line) == 1:
-                    self.__matrix_size = int(line)
-                else:
-                    line = line.split(",")
+                    if len(line) == 1:
+                        self.__matrix_size = int(line)
+                    else:
+                        line = line.split(",")
 
-                    self.__matrix.append([])
-                    for number in line:
-                        try:
-                            self.__matrix[len(self.__matrix) - 1].append(int(number))
-                        except TypeError:
-                            return False
+                        self.__matrix.append([])
+                        for number in line:
+                            try:
+                                self.__matrix[len(self.__matrix) - 1].append(int(number))
+                            except TypeError:
+                                return False
 
-        if self.__matrix_size == 0:
+            if self.__matrix_size == 0:
+                return False
+            return True
+        except FileNotFoundError:
             return False
-        return True
 
     def __set_missing_numbers(self):
         """
@@ -65,4 +68,5 @@ class Problem:
                 self.__missing_numbers.append(number)
                 frequency[number] -= 1
 
-        print(self.__missing_numbers)
+    def is_valid(self):
+        return self.__matrix_size != 0 and len(self.__missing_numbers) != 0
