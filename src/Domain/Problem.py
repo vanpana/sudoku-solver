@@ -17,7 +17,17 @@ class Problem:
         pass  # TODO: implement heuristic -> return float
 
     def expand(self, state):
-        pass  # TODO: implement heuristic -> return list of states
+        states = []
+
+        for first_index in range(0, len(state.values)):
+            for second_index in range(first_index, len(state.values) + 1):
+                if state.values[first_index] < state.values[second_index]:
+                    child = state.interchange_positions(first_index, second_index)
+                    if child not in states:
+                        states.append(child)
+
+        return states
+        pass  # TODO: implement expand -> return list of states
 
     def __read_from_file(self):
         """
