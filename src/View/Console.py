@@ -15,15 +15,20 @@ class Console:
 
             self.__print_menu()
 
-            try:
-                command = int(input("Input your command: "))
+            command = -1
 
-                if command == 0:
-                    exit(0)
-                else:
-                    methods[command]()
+            try:
+                command = int(input("Input your command: ").strip("\n"))
             except TypeError:
                 print("Must input a valid integer")
+
+            if command == 0:
+                exit(0)
+            elif command == -1:
+                pass
+            else:
+                print("Solution is:\n{0}".format(methods[command]()))
+
             self.run()
         else:
             print("Problem is not valid")

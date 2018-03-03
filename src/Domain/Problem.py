@@ -1,9 +1,15 @@
+import copy
+
+from Domain.State import State
+
+
 class Problem:
     def __init__(self, filename):
         self.__matrix_size = 0
         self.__matrix = []
-        self.__initialState = []
+        self.__initial_state = []
         self.__missing_numbers = []
+        self.__illegal_values = []
         self.__filename = filename
 
         # Read problem data
@@ -13,15 +19,19 @@ class Problem:
         if result:
             self.__set_missing_numbers()
 
+    @property
+    def initial_state(self):
+        return self.__initial_state
+
     def heuristic(self, first_state, second_state):
         pass  # TODO: implement heuristic -> return float
 
     def expand(self, state):
         states = []
 
-        for first_index in range(0, len(state.values)):
-            for second_index in range(first_index, len(state.values) + 1):
-                if state.values[first_index] < state.values[second_index]:
+        for first_index in range(0, len(state)):
+            for second_index in range(first_index, len(state)):
+                if state.values[first_index] < state[second_index]:
                     child = state.interchange_positions(first_index, second_index)
                     if child not in states:
                         states.append(child)
@@ -75,5 +85,45 @@ class Problem:
                 self.__missing_numbers.append(number)
                 frequency[number] -= 1
 
+        self.__initial_state = State(copy.deepcopy(self.__missing_numbers))
+
+    def __eq__(self, other):
+        return self.__initial_state == other.initial_state
+
     def is_valid(self):
         return self.__matrix_size != 0 and len(self.__missing_numbers) != 0
+
+    def fill_matrix(self, state):
+        counter = 0
+        filled_matrix = []
+
+        for line in self.__matrix:
+            new_line = []
+            for col in line:
+                if col == 0:
+                    col = state[counter]
+                    counter += 1
+                new_line.append(col)
+            filled_matrix.append(new_line)
+
+        return filled_matrix
+
+    @staticmethod
+    def __check_duplicate_elements_line_col(matrix):
+        for line in matrix:
+            if not len(line) == len(set(line)):
+                return False
+
+        for column in [[row[i] for row in matrix] for i in range(len(matrix))]:
+            if not len(column) == len(set(column)):
+                return False
+
+        return True
+
+    def check_solution(self, state):
+        filled_matrix = self.fill_matrix(state.values)
+
+        return self.__check_duplicate_elements_line_col(filled_matrix)
+
+        # TODO: Check 3x3 rows
+
