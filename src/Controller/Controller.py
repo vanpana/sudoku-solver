@@ -26,7 +26,6 @@ class Controller:
                 for child in self.__instance.expand(node):
                     if not (child in to_visit or child in visited):
                         to_visit.append(child)
-            print(node)
 
         return found
 
