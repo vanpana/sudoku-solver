@@ -8,7 +8,6 @@ class Problem:
         self.__matrix_size = 0
         self.__matrix = []
         self.__initial_state = None
-        self.__missing_numbers = []
         self.__filename = filename
 
         # Read problem data
@@ -19,7 +18,7 @@ class Problem:
             self.__set_missing_numbers()
 
             if self.__initial_state is not None:
-                self.__set_illegal_values(self.__initial_state)
+                self.__set_illegal_values()
                 self.__set_coordinates_missing_numbers()
 
     @property
@@ -32,11 +31,13 @@ class Problem:
     def expand(self, state):
         states = []
 
-        for number in self.__missing_numbers:
+        for number in state.missing_numbers:
             for counter in range(0, len(state)):
-                if state[counter] is None and number not in state.illegal_values[counter]:
+                if state[counter] is None and\
+                        number not in state.illegal_values[counter]:
                     possible_state = state.fill_in(number, counter)
-                    states.append(possible_state)
+                    if possible_state not in states:
+                        states.append(possible_state)
 
         return states
         pass  # TODO: implement expand -> return list of states
@@ -82,12 +83,14 @@ class Problem:
                 if number != 0:
                     frequency[number] -= 1
 
+        missing_numbers = []
         for number in frequency.keys():
             while frequency[number]:
-                self.__missing_numbers.append(number)
+                missing_numbers.append(number)
                 frequency[number] -= 1
 
-        self.__initial_state = State([None for _ in range(0, len(self.__missing_numbers))])
+        self.__initial_state = State([None for _ in range(0, len(missing_numbers))])
+        self.__initial_state.missing_numbers = missing_numbers
 
     def __set_coordinates_missing_numbers(self):
         coordinates = []
@@ -99,7 +102,7 @@ class Problem:
         self.__initial_state.coordinates = coordinates
 
     def is_valid(self):
-        return self.__matrix_size != 0 and len(self.__missing_numbers) != 0
+        return self.__matrix_size != 0 and len(self.__initial_state.missing_numbers) != 0
 
     def fill_matrix(self, state):
         counter = 0
@@ -127,7 +130,7 @@ class Problem:
 
         return filled_matrix
 
-    def __set_illegal_values(self, state):
+    def __set_illegal_values(self):
         illegal_values = []
         for line in self.__matrix:
             counter = 0
@@ -139,9 +142,7 @@ class Problem:
                     illegal_values[len(illegal_values) - 1] = set(illegal_values[len(illegal_values) - 1])
                 counter += 1
 
-        state.illegal_values = illegal_values
-        return state
-
+        self.__initial_state.illegal_values = illegal_values
 
 
     @staticmethod
@@ -168,4 +169,3 @@ class Problem:
 
     def __eq__(self, other):
         return self.__initial_state == other.initial_state
-
