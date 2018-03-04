@@ -19,8 +19,9 @@ class Controller:
         while to_visit != [] and found is None:
             node = to_visit.pop()
             visited.append(node)
+            print(node)
 
-            if self.__instance.check_solution(node):
+            if None not in node and self.__instance.check_solution(node):
                 found = node
             else:
                 for child in self.__instance.expand(node):

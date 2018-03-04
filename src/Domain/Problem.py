@@ -7,9 +7,8 @@ class Problem:
     def __init__(self, filename):
         self.__matrix_size = 0
         self.__matrix = []
-        self.__initial_state = []
+        self.__initial_state = None
         self.__missing_numbers = []
-        self.__illegal_values = []
         self.__filename = filename
 
         # Read problem data
@@ -18,7 +17,10 @@ class Problem:
         # Set missing numbers if read was successful
         if result:
             self.__set_missing_numbers()
-            self.__set_illegal_values()
+
+            if self.__initial_state is not None:
+                self.__set_illegal_values(self.__initial_state)
+                self.__set_coordinates_missing_numbers()
 
     @property
     def initial_state(self):
@@ -30,15 +32,11 @@ class Problem:
     def expand(self, state):
         states = []
 
-        for first_index in range(0, len(state)):
-            for second_index in range(first_index, len(state)):
-                if state.values[first_index] < state[second_index] and\
-                    state.values[second_index] not in self.__illegal_values[first_index] and\
-                        state.values[first_index] not in self.__illegal_values[second_index]:
-
-                    child = state.interchange_positions(first_index, second_index)
-                    if child not in states:
-                        states.append(child)
+        for number in self.__missing_numbers:
+            for counter in range(0, len(state)):
+                if state[counter] is None and number not in state.illegal_values[counter]:
+                    possible_state = state.fill_in(number, counter)
+                    states.append(possible_state)
 
         return states
         pass  # TODO: implement expand -> return list of states
@@ -89,7 +87,16 @@ class Problem:
                 self.__missing_numbers.append(number)
                 frequency[number] -= 1
 
-        self.__initial_state = State(copy.deepcopy(self.__missing_numbers))
+        self.__initial_state = State([None for _ in range(0, len(self.__missing_numbers))])
+
+    def __set_coordinates_missing_numbers(self):
+        coordinates = []
+        for line in range(0, len(self.__matrix)):
+            for column in range(0, len(self.__matrix[line])):
+                if self.__matrix[line][column] == 0:
+                    coordinates.append((line, column))
+
+        self.__initial_state.coordinates = coordinates
 
     def is_valid(self):
         return self.__matrix_size != 0 and len(self.__missing_numbers) != 0
@@ -97,6 +104,9 @@ class Problem:
     def fill_matrix(self, state):
         counter = 0
         filled_matrix = []
+
+        if None in state:
+            return []
 
         for line in self.__matrix:
             new_line = []
@@ -115,19 +125,24 @@ class Problem:
                 column_counter += 1
             filled_matrix.append(new_line)
 
-        print(state)
         return filled_matrix
 
-    def __set_illegal_values(self):
+    def __set_illegal_values(self, state):
+        illegal_values = []
         for line in self.__matrix:
             counter = 0
             for col in line:
                 if col == 0:
-                    self.__illegal_values.append([])
-                    self.__illegal_values[len(self.__illegal_values) - 1].extend(set(line))
-                    self.__illegal_values[len(self.__illegal_values) - 1].extend([row[counter] for row in self.__matrix])
-                    self.__illegal_values[len(self.__illegal_values) - 1] = set(self.__illegal_values[len(self.__illegal_values) - 1])
+                    illegal_values.append([])
+                    illegal_values[len(illegal_values) - 1].extend(set(line))
+                    illegal_values[len(illegal_values) - 1].extend([row[counter] for row in self.__matrix])
+                    illegal_values[len(illegal_values) - 1] = set(illegal_values[len(illegal_values) - 1])
                 counter += 1
+
+        state.illegal_values = illegal_values
+        return state
+
+
 
     @staticmethod
     def __check_duplicate_elements_line_col(matrix):
