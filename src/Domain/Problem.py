@@ -31,7 +31,7 @@ class Problem:
     def expand(self, state):
         states = []
 
-        for number in state.missing_numbers:
+        for number in set(state.missing_numbers):
             for counter in range(0, len(state)):
                 if state[counter] is None and\
                         number not in state.illegal_values[counter]:
@@ -132,17 +132,29 @@ class Problem:
 
     def __set_illegal_values(self):
         illegal_values = []
+        line_position = 0
         for line in self.__matrix:
-            counter = 0
-            for col in line:
-                if col == 0:
+            column_position = 0
+            for value in line:
+                if value == 0:
                     illegal_values.append([])
                     illegal_values[len(illegal_values) - 1].extend(set(line))
-                    illegal_values[len(illegal_values) - 1].extend([row[counter] for row in self.__matrix])
+                    illegal_values[len(illegal_values) - 1].extend([row[column_position] for row in self.__matrix])
+                    illegal_values[len(illegal_values) - 1].extend(self.__get_values_from_square(line_position, column_position))
                     illegal_values[len(illegal_values) - 1] = set(illegal_values[len(illegal_values) - 1])
-                counter += 1
+                column_position += 1
+            line_position += 1
 
         self.__initial_state.illegal_values = illegal_values
+
+    def __get_values_from_square(self, line, col):
+        values = []
+        line_start = (line // 3) * 3
+        column_start = (col // 3) * 3
+        for line in range(line_start, line_start + 3):
+            values.extend(self.__matrix[line][column_start: column_start + 3])
+
+        return set(values)
 
 
     @staticmethod

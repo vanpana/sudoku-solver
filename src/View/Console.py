@@ -1,3 +1,6 @@
+from datetime import time, datetime
+
+
 class Console:
     def __init__(self, controller):
         self.__controller = controller
@@ -27,7 +30,10 @@ class Console:
             elif command == -1:
                 pass
             else:
+                start = datetime.now()
                 print("Solution is:\n{0}".format(methods[command]()))
+                end = datetime.now()
+                print("Time elapsed: " + str(end-start))
 
             self.run()
         else:
