@@ -2,6 +2,7 @@ import os
 
 from Controller.Controller import Controller
 from Domain.Problem import Problem
+from Domain.State import State
 from View.Console import Console
 
 
