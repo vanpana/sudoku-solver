@@ -18,7 +18,7 @@ class Problem:
             self.__set_missing_numbers()
 
             if self.__initial_state is not None:
-                self.__set_illegal_values()
+                self.__set_possible_values()
                 self.__set_coordinates_missing_numbers()
 
     @property
@@ -29,17 +29,6 @@ class Problem:
         pass  # TODO: implement heuristic -> return float
 
     def expand(self, state):
-        states = []
-
-        for number in set(state.missing_numbers):
-            for counter in range(0, len(state)):
-                if state[counter] is None and\
-                        number not in state.illegal_values[counter]:
-                    possible_state = state.fill_in(number, counter)
-                    if possible_state not in states:
-                        states.append(possible_state)
-
-        return states
         pass  # TODO: implement expand -> return list of states
 
     def __read_from_file(self):
@@ -89,7 +78,7 @@ class Problem:
                 missing_numbers.append(number)
                 frequency[number] -= 1
 
-        self.__initial_state = State([None for _ in range(0, len(missing_numbers))])
+        self.__initial_state = State([])
         self.__initial_state.missing_numbers = missing_numbers
 
     def __set_coordinates_missing_numbers(self):
@@ -130,7 +119,8 @@ class Problem:
 
         return filled_matrix
 
-    def __set_illegal_values(self):
+    def __set_possible_values(self):
+        possible_values = []
         illegal_values = []
         line_position = 0
         for line in self.__matrix:
@@ -138,14 +128,28 @@ class Problem:
             for value in line:
                 if value == 0:
                     illegal_values.append([])
+                    possible_values.append([])
+
                     illegal_values[len(illegal_values) - 1].extend(set(line))
                     illegal_values[len(illegal_values) - 1].extend([row[column_position] for row in self.__matrix])
                     illegal_values[len(illegal_values) - 1].extend(self.__get_values_from_square(line_position, column_position))
                     illegal_values[len(illegal_values) - 1] = set(illegal_values[len(illegal_values) - 1])
+
+                    for number in set(self.__initial_state.missing_numbers):
+                        if number not in illegal_values[len(illegal_values) - 1]:
+                            possible_values[len(possible_values) - 1].append(number)
+                    possible_values[len(possible_values) - 1] = set(possible_values[len(possible_values) - 1])
+
+                    if len(possible_values[len(possible_values) - 1]) == 1:
+                        # Pop also from missing numbers
+                        value = possible_values.pop().pop()
+                        illegal_values.pop()
+                        self.__matrix[line_position][column_position] = value
+
                 column_position += 1
             line_position += 1
 
-        self.__initial_state.illegal_values = illegal_values
+        self.__initial_state.possible_values = possible_values
 
     def __get_values_from_square(self, line, col):
         values = []
@@ -175,9 +179,15 @@ class Problem:
         if len(filled_matrix) == 0:
             return False
 
-        return self.__check_duplicate_elements_line_col(filled_matrix)
+        if not self.__check_duplicate_elements_line_col(filled_matrix):
+            return False
 
-        # TODO: Check 3x3 rows
+        for line in range(0, len(self.__matrix)):
+            for col in range(0, len(self.__matrix)):
+                if len(self.__get_values_from_square(line, col)) != len(self.__matrix):
+                    return False
+
+        return True
 
     def __eq__(self, other):
         return self.__initial_state == other.initial_state
