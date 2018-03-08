@@ -22,7 +22,7 @@ class Controller:
             print(node)
 
             if None not in node and self.__instance.check_solution(node):
-                found = node
+                found = self.__instance.fill_matrix(node)
             else:
                 for child in self.__instance.expand(node):
                     if not (child in to_visit or child in visited):

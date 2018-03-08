@@ -20,6 +20,7 @@ class Problem:
             if self.__initial_state is not None:
                 self.__set_possible_values()
                 self.__set_coordinates_missing_numbers()
+                self.__set_initial_state()
 
     @property
     def initial_state(self):
@@ -29,7 +30,18 @@ class Problem:
         pass  # TODO: implement heuristic -> return float
 
     def expand(self, state):
-        pass  # TODO: implement expand -> return list of states
+        states = []
+
+        for number in set(state.missing_numbers):
+            for counter in range(0, len(state)):
+                if state[counter] is None and \
+                        number in state.possible_values[counter]:
+                    possible_state = state.fill_in(number, counter)
+                    if possible_state not in states:
+                        states.append(possible_state)
+
+        return states
+        # TODO: implement expand -> return list of states
 
     def __read_from_file(self):
         """
@@ -78,6 +90,7 @@ class Problem:
                 missing_numbers.append(number)
                 frequency[number] -= 1
 
+        # self.__initial_state = State([])
         self.__initial_state = State([])
         self.__initial_state.missing_numbers = missing_numbers
 
@@ -89,6 +102,9 @@ class Problem:
                     coordinates.append((line, column))
 
         self.__initial_state.coordinates = coordinates
+
+    def __set_initial_state(self):
+        pass
 
     def is_valid(self):
         return self.__matrix_size != 0 and len(self.__initial_state.missing_numbers) != 0
@@ -132,7 +148,7 @@ class Problem:
 
                     illegal_values[len(illegal_values) - 1].extend(set(line))
                     illegal_values[len(illegal_values) - 1].extend([row[column_position] for row in self.__matrix])
-                    illegal_values[len(illegal_values) - 1].extend(self.__get_values_from_square(line_position, column_position))
+                    illegal_values[len(illegal_values) - 1].extend(self.__get_values_from_square(line_position, column_position, self.__matrix))
                     illegal_values[len(illegal_values) - 1] = set(illegal_values[len(illegal_values) - 1])
 
                     for number in set(self.__initial_state.missing_numbers):
@@ -141,8 +157,13 @@ class Problem:
                     possible_values[len(possible_values) - 1] = set(possible_values[len(possible_values) - 1])
 
                     if len(possible_values[len(possible_values) - 1]) == 1:
-                        # Pop also from missing numbers
                         value = possible_values.pop().pop()
+
+                        for counter in range(0, len(self.__initial_state.missing_numbers)):
+                            if self.__initial_state.missing_numbers[counter] == value:
+                                self.__initial_state.missing_numbers.pop(counter)
+                                break
+
                         illegal_values.pop()
                         self.__matrix[line_position][column_position] = value
 
@@ -150,13 +171,14 @@ class Problem:
             line_position += 1
 
         self.__initial_state.possible_values = possible_values
+        self.__initial_state.values = [None for _ in range(0, len(self.__initial_state.missing_numbers))]
 
-    def __get_values_from_square(self, line, col):
+    def __get_values_from_square(self, line, col, matrix):
         values = []
         line_start = (line // 3) * 3
         column_start = (col // 3) * 3
         for line in range(line_start, line_start + 3):
-            values.extend(self.__matrix[line][column_start: column_start + 3])
+            values.extend(matrix[line][column_start: column_start + 3])
 
         return set(values)
 
@@ -184,7 +206,8 @@ class Problem:
 
         for line in range(0, len(self.__matrix)):
             for col in range(0, len(self.__matrix)):
-                if len(self.__get_values_from_square(line, col)) != len(self.__matrix):
+                square_values = self.__get_values_from_square(line, col, filled_matrix)
+                if len(square_values) != len(self.__matrix):
                     return False
 
         return True

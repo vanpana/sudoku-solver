@@ -31,7 +31,13 @@ class Console:
                 pass
             else:
                 start = datetime.now()
-                print("Solution is:\n{0}".format(methods[command]()))
+                matrix_solution = methods[command]()
+                print("Solution is:")
+
+                for line in matrix_solution:
+                    for column in line:
+                        print(column, end=" ")
+                    print()
                 end = datetime.now()
                 print("Time elapsed: " + str(end-start))
 
