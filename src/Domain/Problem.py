@@ -32,13 +32,14 @@ class Problem:
     def expand(self, state):
         states = []
 
-        for number in set(state.missing_numbers):
-            for counter in range(0, len(state)):
-                if state[counter] is None and \
-                        number in state.possible_values[counter]:
+        for counter in range(0, len(state)):
+            if state[counter] is None:
+                while len(state.possible_values[counter]) > 0:
+                    number = state.possible_values[counter].pop()
                     possible_state = state.fill_in(number, counter)
                     if possible_state not in states:
                         states.append(possible_state)
+                break
 
         return states
         # TODO: implement expand -> return list of states

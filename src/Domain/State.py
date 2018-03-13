@@ -12,7 +12,7 @@ class State:
         possible_state = copy.deepcopy(self)
         possible_state.values[pos] = number
 
-        possible_state.possible_values[pos].remove(number)
+        # possible_state.possible_values[pos].remove(number)
 
         inserted_line, inserted_col = possible_state.coordinates[pos]
 
