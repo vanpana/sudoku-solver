@@ -31,7 +31,14 @@ class State:
         return self.values[item]
 
     def __eq__(self, other):
+        if other is None:
+            return False
+        if type(other) == tuple:
+            return self.values == other[1].values
         return self.values == other.values
+
+    def __lt__(self, other):
+        return self.values.count(None) < other.values.count(None)
 
     def __str__(self):
         return str(self.values)

@@ -26,8 +26,8 @@ class Problem:
     def initial_state(self):
         return self.__initial_state
 
-    def heuristic(self, first_state, second_state):
-        pass  # TODO: implement heuristic -> return float
+    def heuristic(self, state):
+        return len(state) - len(set(state.values))
 
     def expand(self, state):
         states = []
@@ -107,7 +107,7 @@ class Problem:
         pass
 
     def is_valid(self):
-        return self.__matrix_size != 0 and len(self.__initial_state.missing_numbers) != 0
+        return self.__matrix_size != 0  # and len(self.__initial_state.missing_numbers) != 0
 
     def fill_matrix(self, state):
         counter = 0
